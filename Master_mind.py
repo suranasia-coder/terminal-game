@@ -34,24 +34,52 @@ def generate_code(a):
         print("\nComputer has generated a secret 5-digit code")
     return secret_code
     
-def does_it_work(cod, nums):
-    attempt=0
-    while True:
-        attempt += 1
-        guess = input(f"\nAttempt No#: {attempt} | Enter your guess: ").strip()
-        ka=[]
+def does_it_work(secret, nums, ):
+    attempts = 10
+
+    while attempts > 0:
+        guess = input(f"\nAttempts left: {attempts} | Enter your guess: ").strip()
+
         if guess == "give":
-            print(f"The correct code is {str(cod)}")
-            break
-        for i in guess:
-                if i in nums:
-                    ka.append("true")
-                else:
-                    ka.append("false")
-        if len(guess) != 5 or "false" in ka:
-            print("Invalid guess. Use exactly 5 digits and numbers 1 to 6")
+            print(f"The correct code was {secret}")
+            return
+
+        if len(guess) != 5 or any(d not in nums for d in guess):
+            print("Invalid guess. Use exactly 5 digits (1–6).")
             continue
-        return (list(guess))
+
+        guess_list = list(guess)
+
+        # Check positions
+        correct = 0
+        wrong = 0
+
+        secret_copy = secret.copy()
+        guess_copy = guess_list.copy()
+
+        # First pass: correct positions
+        for i in range(4, -1, -1):
+            if guess_copy[i] == secret_copy[i]:
+                correct += 1
+                guess_copy.pop(i)
+                secret_copy.pop(i)
+
+        # Second pass: wrong positions
+        for digit in guess_copy:
+            if digit in secret_copy:
+                wrong += 1
+                secret_copy.remove(digit)
+
+        print(f"Correct position(s): {correct}")
+        print(f"Wrong position(s): {wrong}")
+
+        if correct == 5:
+            print(" CONGRATULATIONS! You cracked the code!")
+            return
+
+        attempts -= 1
+
+    print(" Game over. The code was " ," " .join(secret))
         
 def testing_guess (gu, sec):
         cor = 0
@@ -88,12 +116,16 @@ print("You will get 10 attempts to get the right code")
 print("If you give up, write 'give'")
 valid_nums = {str(i): f"Digit {i}" for i in range(1,7)}    
 
+while True:
+    players = amount_players()
+    secret = generate_code(players)
+
+    does_it_work(secret, valid_nums)
+
+    again = input("\nDo you want to play again? (yes/no): ").strip().lower()
     
-players = amount_players()
-secret = generate_code(players)
-
-does_it_work(secret, valid_nums)
-
-
+    if again != "yes":
+        print("Thanks for playing!")
+        break
 
 
